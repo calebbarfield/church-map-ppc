@@ -152,6 +152,7 @@
 mapboxgl.accessToken = 'pk.eyJ1IjoiY2FsZWJiYXJmaWVsZCIsImEiOiJjbW42NHFjZ24wMjZoMm9wejU4Ymh1bDdlIn0.Gsp9A3u7A675J3dimnFeLA';
 
 const LOGO_URL = 'https://storage1.snappages.site/BBR3GQ/assets/images/23682695_500x500_500.png';
+const PLAN_VISIT_URL = 'https://api.leadconnectorhq.com/widget/form/ty8x2qnVQoZnP9hIAywD';
 
 const campuses = [
   {
@@ -223,9 +224,11 @@ function openSidebar(campus) {
       <img class="photo" src="${campus.image}" alt="${campus.name}">
       <p><strong>Location:</strong><br>${campus.address}</p>
       <p><strong>Service Times:</strong><br>${campus.times}</p>
+      <p><strong>Childcare:</strong><br>This campus offers childcare for children ages birth through 5th grade.</p>
       <p><strong>${campus.pastorTitle || 'Campus Pastor'}:</strong><br>${campus.pastor}</p>
       <a class="btn" target="_blank" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(campus.address)}">Get Directions</a>
       <a class="btn secondary" target="_blank" href="${campus.link}">Visit Campus Page</a>
+      <a class="btn secondary" target="_blank" href="${PLAN_VISIT_URL}">Plan Your Visit</a>
     </div>
   `;
   document.getElementById('sidebar').classList.add('open');
