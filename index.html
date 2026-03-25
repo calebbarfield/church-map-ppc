@@ -15,7 +15,7 @@
       height: 100%;
       background: #0a0a0a;
       color: #fff;
-      font-family: -apple-system, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
     #map {
@@ -28,16 +28,51 @@
       right: 0;
       top: 0;
       width: 400px;
+      max-width: 92vw;
       height: 100%;
-      background: rgba(10,10,10,0.96);
+      background: rgba(10, 10, 10, 0.96);
       transform: translateX(100%);
-      transition: 0.3s ease;
-      padding: 20px;
+      transition: transform 0.3s ease;
       overflow-y: auto;
+      box-shadow: -10px 0 30px rgba(0,0,0,0.25);
+      z-index: 10;
     }
 
     .sidebar.open {
       transform: translateX(0);
+    }
+
+    .sidebar-inner {
+      padding: 20px;
+      position: relative;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 30px;
+      height: 30px;
+      border: 0;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .close-btn:hover {
+      background: rgba(255,255,255,0.14);
+    }
+
+    .sidebar h2 {
+      margin: 0 36px 16px 0;
+      font-size: 24px;
+      line-height: 1.2;
     }
 
     .marker {
@@ -49,36 +84,61 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 0 20px rgba(0,128,128,0.6);
+      box-shadow:
+        0 0 0 6px rgba(0,128,128,0.12),
+        0 0 20px rgba(0,128,128,0.6);
       cursor: pointer;
     }
 
     .marker img {
       width: 22px;
       height: 22px;
+      object-fit: contain;
     }
 
-    /* ✅ FIXED IMAGE STYLE */
     .photo {
       width: 100%;
-      height: 260px;
-      object-fit: contain;
+      height: 280px;
+      object-fit: cover;
+      object-position: center top;
+      border-radius: 14px;
+      margin-bottom: 18px;
+      display: block;
       background: #111;
-      padding: 10px;
-      border-radius: 12px;
-      margin-bottom: 15px;
-      box-shadow: 0 0 20px rgba(0,128,128,0.2);
+    }
+
+    .sidebar p {
+      margin: 0 0 14px;
+      line-height: 1.5;
+      color: rgba(255,255,255,0.92);
     }
 
     .btn {
-      display:block;
-      margin-top:15px;
-      padding:12px;
-      text-align:center;
-      background:#008080;
-      color:white;
-      text-decoration:none;
-      border-radius:10px;
+      display: block;
+      margin-top: 14px;
+      padding: 12px 14px;
+      text-align: center;
+      background: #008080;
+      color: white;
+      text-decoration: none;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+
+    .btn.secondary {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    @media (max-width: 700px) {
+      .sidebar {
+        width: 100%;
+        max-width: 100%;
+      }
+
+      .photo {
+        height: 240px;
+      }
     }
   </style>
 </head>
@@ -94,86 +154,93 @@ mapboxgl.accessToken = 'pk.eyJ1IjoiY2FsZWJiYXJmaWVsZCIsImEiOiJjbW42NHFjZ24wMjZoM
 const LOGO_URL = 'https://storage1.snappages.site/BBR3GQ/assets/images/23682695_500x500_500.png';
 
 const campuses = [
-{
-  name:'Palmetto Pointe Church - Myrtle Beach',
-  address:'2901 Fantasy Way, Myrtle Beach, SC',
-  times:'9am & 11am',
-  pastor:'Jamie & Maddie Barfield',
-  pastorTitle:'Lead Pastors',
-  image:'https://storage1.snappages.site/BBR3GQ/assets/images/14445111_5796x7891_500.jpg',
-  link:'https://www.palmettopointechurch.com/myrtlebeach'
-},
-{
-  name:'Palmetto Pointe Church - Socastee',
-  address:'4475 Millpond Rd, Myrtle Beach, SC',
-  coords:[-78.9982, 33.6842], /* ✅ FIXED LOCATION */
-  times:'10am',
-  pastor:'Thomas & Kylie Grainger',
-  pastorTitle:'Campus Pastor',
-  image:'https://storage1.snappages.site/BBR3GQ/assets/images/16567429_1024x1533_500.jpeg',
-  link:'https://palmettopointechurch.com/socastee'
-},
-{
-  name:'Palmetto Pointe Church - Aynor',
-  address:'243 8th Ave, Aynor, SC',
-  times:'10am',
-  pastor:'Samson & Whitney Ahmed',
-  pastorTitle:'Campus Pastor',
-  image:'https://storage1.snappages.site/BBR3GQ/assets/images/16585417_1024x1672_500.jpeg',
-  link:'https://palmettopointechurch.com/aynor'
-},
-{
-  name:'Palmetto Pointe Church - Clemson',
-  address:'434 Church St, Pendleton, SC',
-  times:'10am',
-  pastor:'Mike & Terri Teramano',
-  pastorTitle:'Campus Pastor',
-  image:'https://storage1.snappages.site/BBR3GQ/assets/images/16585377_1024x1833_500.jpeg',
-  link:'https://palmettopointechurch.com/clemson'
-},
-{
-  name:'Palmetto Pointe Church - Southern Illinois',
-  address:'1300 Broeking Rd, Marion, IL',
-  times:'10am',
-  pastor:'Justin & Keturah Dusch',
-  pastorTitle:'Campus Pastor',
-  image:'https://storage1.snappages.site/BBR3GQ/assets/images/17870209_853x1280_500.JPEG',
-  link:'https://palmettopointechurch.com/southernillinois'
-}
+  {
+    name: 'Palmetto Pointe Church - Myrtle Beach',
+    address: '2901 Fantasy Way, Myrtle Beach, SC',
+    times: '9am & 11am',
+    pastor: 'Lead Pastors',
+    pastorTitle: 'Lead Pastors',
+    image: 'https://storage1.snappages.site/BBR3GQ/assets/images/14445111_5796x7891_500.jpg',
+    link: 'https://www.palmettopointechurch.com/myrtlebeach'
+  },
+  {
+    name: 'Palmetto Pointe Church - Socastee',
+    address: '4475 Millpond Rd, Myrtle Beach, SC',
+    coords: [-78.9982, 33.6842],
+    times: '10am',
+    pastor: 'Thomas & Kylie Grainger',
+    pastorTitle: 'Campus Pastor',
+    image: 'https://storage1.snappages.site/BBR3GQ/assets/images/16567429_1024x1533_500.jpeg',
+    link: 'https://palmettopointechurch.com/socastee'
+  },
+  {
+    name: 'Palmetto Pointe Church - Aynor',
+    address: '243 8th Ave, Aynor, SC',
+    times: '10am',
+    pastor: 'Samson & Whitney Ahmed',
+    pastorTitle: 'Campus Pastor',
+    image: 'https://storage1.snappages.site/BBR3GQ/assets/images/16585417_1024x1672_500.jpeg',
+    link: 'https://palmettopointechurch.com/aynor'
+  },
+  {
+    name: 'Palmetto Pointe Church - Clemson',
+    address: '434 Church St, Pendleton, SC',
+    times: '10am',
+    pastor: 'Mike & Terri Teramano',
+    pastorTitle: 'Campus Pastor',
+    image: 'https://storage1.snappages.site/BBR3GQ/assets/images/16585377_1024x1833_500.jpeg',
+    link: 'https://palmettopointechurch.com/clemson'
+  },
+  {
+    name: 'Palmetto Pointe Church - Southern Illinois',
+    address: '1300 Broeking Rd, Marion, IL',
+    times: '10am',
+    pastor: 'Justin & Keturah Dusch',
+    pastorTitle: 'Campus Pastor',
+    image: 'https://storage1.snappages.site/BBR3GQ/assets/images/17870209_853x1280_500.JPEG',
+    link: 'https://palmettopointechurch.com/southernillinois'
+  }
 ];
 
 const map = new mapboxgl.Map({
-  container:'map',
-  style:'mapbox://styles/calebbarfield/cmn64wn1o000601qua68w1xk7',
-  center:[-82,35],
-  zoom:5
+  container: 'map',
+  style: 'mapbox://styles/calebbarfield/cmn64wn1o000601qua68w1xk7',
+  center: [-82, 35],
+  zoom: 5
 });
 
 const bounds = new mapboxgl.LngLatBounds();
 
-function openSidebar(campus){
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+}
+
+function openSidebar(campus) {
   document.getElementById('sidebar').innerHTML = `
-    <h2>${campus.name}</h2>
-    <img class="photo" src="${campus.image}">
-    <p><strong>Location:</strong><br>${campus.address}</p>
-    <p><strong>Service Times:</strong><br>${campus.times}</p>
-    <p><strong>${campus.pastorTitle || 'Campus Pastor'}:</strong><br>${campus.pastor}</p>
-    <a class="btn" target="_blank" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(campus.address)}">Get Directions</a>
-    <a class="btn" target="_blank" href="${campus.link}">Visit Campus Page</a>
+    <div class="sidebar-inner">
+      <button class="close-btn" aria-label="Close sidebar" onclick="closeSidebar()">×</button>
+      <h2>${campus.name}</h2>
+      <img class="photo" src="${campus.image}" alt="${campus.name}">
+      <p><strong>Location:</strong><br>${campus.address}</p>
+      <p><strong>Service Times:</strong><br>${campus.times}</p>
+      <p><strong>${campus.pastorTitle || 'Campus Pastor'}:</strong><br>${campus.pastor}</p>
+      <a class="btn" target="_blank" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(campus.address)}">Get Directions</a>
+      <a class="btn secondary" target="_blank" href="${campus.link}">Visit Campus Page</a>
+    </div>
   `;
   document.getElementById('sidebar').classList.add('open');
 }
 
-async function geocode(address){
-  const res = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(address)}.json?access_token=${mapboxgl.accessToken}`);
+async function geocode(address) {
+  const res = await fetch(
+    `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(address)}.json?access_token=${mapboxgl.accessToken}`
+  );
   const data = await res.json();
   return data.features[0].center;
 }
 
-async function loadMap(){
-  for (let campus of campuses){
-
-    /* ✅ USE FIXED COORDS IF AVAILABLE */
+async function loadMap() {
+  for (let campus of campuses) {
     const coords = campus.coords || await geocode(campus.address);
 
     const el = document.createElement('div');
@@ -181,16 +248,17 @@ async function loadMap(){
 
     const img = document.createElement('img');
     img.src = LOGO_URL;
+    img.alt = campus.name;
     el.appendChild(img);
 
-    el.onclick = ()=>openSidebar(campus);
+    el.onclick = () => openSidebar(campus);
 
     new mapboxgl.Marker(el).setLngLat(coords).addTo(map);
 
     bounds.extend(coords);
   }
 
-  map.fitBounds(bounds,{padding:80});
+  map.fitBounds(bounds, { padding: 80 });
 }
 
 map.on('load', loadMap);
