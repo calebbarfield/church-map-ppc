@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Palmetto Pointe Church Map</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.0.0/mapbox-gl.js"></script>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.0.0/mapbox-gl.css" rel="stylesheet" />
+
+  <style>
+    body { margin:0; padding:0; }
+    #map { position:absolute; top:0; bottom:0; width:100%; }
+
+    .marker {
+      width: 18px;
+      height: 18px;
+      background-color: #008080;
+      border-radius: 50%;
+      box-shadow: 0 0 12px #008080, 0 0 24px rgba(0,128,128,0.6);
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .marker:hover {
+      transform: scale(1.25);
+    }
+
+    .mapboxgl-popup-content {
+      background: #111;
+      color: #fff;
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-family: -apple-system, sans-serif;
+    }
+
+    .mapboxgl-popup-content a {
+      color: #008080;
+      text-decoration: none;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<script>
+mapboxgl.accessToken = 'pk.eyJ1IjoiY2FsZWJiYXJmaWVsZCIsImEiOiJjbW42NHFjZ24wMjZoMm9wejU4Ymh1bDdlIn0.Gsp9A3u7A675J3dimnFeLA';
+
+const locations = [
+  { name: "Palmetto Pointe Church - Myrtle Beach", coords: [-78.8867, 33.6891] },
+  { name: "Palmetto Pointe Church - Socastee", coords: [-78.9989, 33.6835] },
+  { name: "Palmetto Pointe Church - Aynor", coords: [-79.2003, 33.9954] },
+  { name: "Palmetto Pointe Church - Clemson", coords: [-82.8374, 34.6834] },
+  { name: "Palmetto Pointe Church - Southern Illinois", coords: [-89.2168, 37.7273] }
+];
+
+const map = new mapboxgl.Map({
+  container: 'map',
+  style: 'mapbox://styles/calebbarfield/cmn64wn1o000601qua68w1xk7',
+  center: [-82, 35],
+  zoom: 5,
+  scrollZoom: false
+});
+
+const bounds = new mapboxgl.LngLatBounds();
+
+locations.forEach(loc => {
+  const el = document.createElement('div');
+  el.className = 'marker';
+
+  const popup = new mapboxgl.Popup({ offset: 15 })
+    .setHTML(`
+      <strong>${loc.name}</strong><br/>
+      <a href="https://www.google.com/maps/search/?api=1&query=${loc.coords[1]},${loc.coords[0]}" target="_blank">
+        Get Directions
+      </a>
+    `);
+
+  new mapboxgl.Marker(el)
+    .setLngLat(loc.coords)
+    .setPopup(popup)
+    .addTo(map);
+
+  bounds.extend(loc.coords);
+});
+
+map.on('load', () => {
+  map.fitBounds(bounds, {
+    padding: 80,
+    maxZoom: 7,
+    duration: 1500
+  });
+});
+</script>
+
+</body>
+</html>
