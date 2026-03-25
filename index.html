@@ -1,99 +1,476 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Palmetto Pointe Church Map</title>
+  <title>Palmetto Pointe Church Locations</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <script src="https://api.mapbox.com/mapbox-gl-js/v3.0.0/mapbox-gl.js"></script>
   <link href="https://api.mapbox.com/mapbox-gl-js/v3.0.0/mapbox-gl.css" rel="stylesheet" />
 
   <style>
-    body { margin:0; padding:0; }
-    #map { position:absolute; top:0; bottom:0; width:100%; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: #0a0a0a;
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+
+    .wrap {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+      background: #0a0a0a;
+    }
+
+    #map {
+      position: absolute;
+      inset: 0;
+    }
+
+    .intro-card {
+      position: absolute;
+      left: 24px;
+      bottom: 24px;
+      z-index: 5;
+      max-width: 340px;
+      padding: 18px 20px;
+      border-radius: 18px;
+      background: rgba(10, 10, 10, 0.88);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+      backdrop-filter: blur(10px);
+    }
+
+    .intro-card h2 {
+      margin: 0 0 8px;
+      font-size: 22px;
+      line-height: 1.2;
+    }
+
+    .intro-card p {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.55;
+      color: rgba(255, 255, 255, 0.82);
+    }
+
+    .sidebar {
+      position: absolute;
+      top: 0;
+      right: 0;
+      z-index: 10;
+      width: 400px;
+      max-width: 94vw;
+      height: 100%;
+      background: rgba(10, 10, 10, 0.96);
+      border-left: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: -10px 0 30px rgba(0, 0, 0, 0.32);
+      transform: translateX(100%);
+      transition: transform 0.28s ease;
+      display: flex;
+      flex-direction: column;
+      backdrop-filter: blur(10px);
+    }
+
+    .sidebar.open {
+      transform: translateX(0);
+    }
+
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 20px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .sidebar-title {
+      margin: 0;
+      font-size: 20px;
+      line-height: 1.2;
+      font-weight: 700;
+    }
+
+    .close-btn {
+      border: 0;
+      background: transparent;
+      color: #ffffff;
+      font-size: 28px;
+      line-height: 1;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .sidebar-content {
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .eyebrow {
+      margin-bottom: 12px;
+      color: #008080;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .campus-photo {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      border-radius: 16px;
+      margin-bottom: 18px;
+      background: #111111;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .info-block {
+      margin-bottom: 18px;
+    }
+
+    .info-label {
+      margin-bottom: 6px;
+      font-size: 12px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.64);
+    }
+
+    .info-value {
+      font-size: 16px;
+      line-height: 1.55;
+      color: #ffffff;
+    }
+
+    .actions {
+      display: grid;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .btn {
+      display: inline-block;
+      text-align: center;
+      text-decoration: none;
+      padding: 14px 16px;
+      border-radius: 14px;
+      font-weight: 700;
+      transition: transform 0.2s ease, opacity 0.2s ease, background 0.2s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      opacity: 0.96;
+    }
+
+    .btn-primary {
+      background: #008080;
+      color: #ffffff;
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
 
     .marker {
-      width: 18px;
-      height: 18px;
-      background-color: #008080;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
-      box-shadow: 0 0 12px #008080, 0 0 24px rgba(0,128,128,0.6);
+      background: rgba(0, 128, 128, 0.18);
+      border: 2px solid #008080;
+      box-shadow:
+        0 0 0 7px rgba(0, 128, 128, 0.13),
+        0 0 18px rgba(0, 128, 128, 0.75),
+        0 0 34px rgba(0, 128, 128, 0.38);
+      display: flex;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
-      transition: transform 0.2s ease;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
     .marker:hover {
-      transform: scale(1.25);
+      transform: scale(1.08);
+      box-shadow:
+        0 0 0 9px rgba(0, 128, 128, 0.18),
+        0 0 24px rgba(0, 128, 128, 0.88),
+        0 0 42px rgba(0, 128, 128, 0.45);
     }
 
-    .mapboxgl-popup-content {
-      background: #111;
-      color: #fff;
-      border-radius: 10px;
-      padding: 12px 14px;
-      font-family: -apple-system, sans-serif;
+    .marker img {
+      width: 22px;
+      height: 22px;
+      object-fit: contain;
+      pointer-events: none;
+      filter: drop-shadow(0 0 4px rgba(255,255,255,0.2));
     }
 
-    .mapboxgl-popup-content a {
-      color: #008080;
-      text-decoration: none;
-      font-weight: 600;
+    .status-badge {
+      position: absolute;
+      top: 24px;
+      left: 24px;
+      z-index: 5;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(10, 10, 10, 0.88);
+      border: 1px solid rgba(255,255,255,0.08);
+      font-size: 13px;
+      color: rgba(255,255,255,0.82);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.22);
+      backdrop-filter: blur(10px);
+    }
+
+    @media (max-width: 900px) {
+      .sidebar {
+        width: 100%;
+        max-width: 100%;
+      }
+
+      .intro-card {
+        left: 16px;
+        right: 16px;
+        bottom: 16px;
+        max-width: none;
+      }
+
+      .status-badge {
+        top: 16px;
+        left: 16px;
+      }
     }
   </style>
 </head>
 <body>
+  <div class="wrap">
+    <div id="map"></div>
 
-<div id="map"></div>
+    <div class="status-badge" id="statusBadge">Loading campuses…</div>
 
-<script>
-mapboxgl.accessToken = 'pk.eyJ1IjoiY2FsZWJiYXJmaWVsZCIsImEiOiJjbW42NHFjZ24wMjZoMm9wejU4Ymh1bDdlIn0.Gsp9A3u7A675J3dimnFeLA';
+    <div class="intro-card">
+      <h2>Find a Campus</h2>
+      <p>Click any campus marker to view service times, location details, pastor information, and quick links.</p>
+    </div>
 
-const locations = [
-  { name: "Palmetto Pointe Church - Myrtle Beach", coords: [-78.8867, 33.6891] },
-  { name: "Palmetto Pointe Church - Socastee", coords: [-78.9989, 33.6835] },
-  { name: "Palmetto Pointe Church - Aynor", coords: [-79.2003, 33.9954] },
-  { name: "Palmetto Pointe Church - Clemson", coords: [-82.8374, 34.6834] },
-  { name: "Palmetto Pointe Church - Southern Illinois", coords: [-89.2168, 37.7273] }
-];
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <h3 id="sidebarTitle" class="sidebar-title">Campus Details</h3>
+        <button id="closeSidebar" class="close-btn" aria-label="Close sidebar">×</button>
+      </div>
+      <div id="sidebarContent" class="sidebar-content">
+        <div class="eyebrow">Palmetto Pointe Church</div>
+        <p>Select a campus marker to view details.</p>
+      </div>
+    </aside>
+  </div>
 
-const map = new mapboxgl.Map({
-  container: 'map',
-  style: 'mapbox://styles/calebbarfield/cmn64wn1o000601qua68w1xk7',
-  center: [-82, 35],
-  zoom: 5,
-  scrollZoom: false
-});
+  <script>
+    mapboxgl.accessToken = 'pk.eyJ1IjoiY2FsZWJiYXJmaWVsZCIsImEiOiJjbW42NHFjZ24wMjZoMm9wejU4Ymh1bDdlIn0.Gsp9A3u7A675J3dimnFeLA';
 
-const bounds = new mapboxgl.LngLatBounds();
+    const LOGO_URL = 'https://drive.google.com/uc?export=view&id=1h0izyHjrmxZcLHWaJjA-SYZ0RiAALJwv';
 
-locations.forEach(loc => {
-  const el = document.createElement('div');
-  el.className = 'marker';
+    const campuses = [
+      {
+        name: 'Palmetto Pointe Church - Myrtle Beach',
+        address: '2901 Fantasy Way, Myrtle Beach, SC',
+        serviceTimes: '9am & 11am',
+        campusPage: 'https://www.palmettopointechurch.com/myrtlebeach',
+        pastor: '',
+        pastorImage: '',
+        visitUrl: 'https://www.palmettopointechurch.com/myrtlebeach'
+      },
+      {
+        name: 'Palmetto Pointe Church - Socastee',
+        address: '4475 Millpond Rd, Myrtle Beach, SC',
+        serviceTimes: '10am',
+        campusPage: 'https://palmettopointechurch.com/socastee',
+        pastor: 'Thomas & Kylie Grainger',
+        pastorImage: 'https://drive.google.com/uc?export=view&id=1p2NAEiU4e0g-1VfvTbmYpDVVPmLKAQZo',
+        visitUrl: 'https://palmettopointechurch.com/socastee'
+      },
+      {
+        name: 'Palmetto Pointe Church - Aynor',
+        address: '243 8th Ave, Aynor, SC',
+        serviceTimes: '10am',
+        campusPage: 'https://palmettopointechurch.com/aynor',
+        pastor: 'Samson & Whitney Ahmed',
+        pastorImage: 'https://drive.google.com/uc?export=view&id=1hPI8jZIhuFvaoiV6nWPyEjtb27JFPzWh',
+        visitUrl: 'https://palmettopointechurch.com/aynor'
+      },
+      {
+        name: 'Palmetto Pointe Church - Clemson',
+        address: '434 Church St, Pendleton, SC',
+        serviceTimes: '10am',
+        campusPage: 'https://palmettopointechurch.com/clemson',
+        pastor: 'Mike & Terri Teramano',
+        pastorImage: 'https://drive.google.com/uc?export=view&id=1yWd4OjwWZEb4P-EbHLWbiX9E0iFZ0dc3',
+        visitUrl: 'https://palmettopointechurch.com/clemson'
+      },
+      {
+        name: 'Palmetto Pointe Church - Southern Illinois',
+        address: '1300 Broeking Rd, Marion, IL',
+        serviceTimes: '10am',
+        campusPage: 'https://palmettopointechurch.com/southernillinois',
+        pastor: 'Justin & Keturah Dusch',
+        pastorImage: 'https://drive.google.com/uc?export=view&id=1OT1CDmK3JIeXVJFZL9n4cEFBUQGEo_cU',
+        visitUrl: 'https://palmettopointechurch.com/southernillinois'
+      }
+    ];
 
-  const popup = new mapboxgl.Popup({ offset: 15 })
-    .setHTML(`
-      <strong>${loc.name}</strong><br/>
-      <a href="https://www.google.com/maps/search/?api=1&query=${loc.coords[1]},${loc.coords[0]}" target="_blank">
-        Get Directions
-      </a>
-    `);
+    const map = new mapboxgl.Map({
+      container: 'map',
+      style: 'mapbox://styles/calebbarfield/cmn64wn1o000601qua68w1xk7',
+      center: [-81.5, 34.8],
+      zoom: 5,
+      pitch: 0,
+      bearing: 0,
+      scrollZoom: false
+    });
 
-  new mapboxgl.Marker(el)
-    .setLngLat(loc.coords)
-    .setPopup(popup)
-    .addTo(map);
+    const bounds = new mapboxgl.LngLatBounds();
+    const sidebar = document.getElementById('sidebar');
+    const sidebarTitle = document.getElementById('sidebarTitle');
+    const sidebarContent = document.getElementById('sidebarContent');
+    const closeSidebar = document.getElementById('closeSidebar');
+    const statusBadge = document.getElementById('statusBadge');
 
-  bounds.extend(loc.coords);
-});
+    closeSidebar.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+    });
 
-map.on('load', () => {
-  map.fitBounds(bounds, {
-    padding: 80,
-    maxZoom: 7,
-    duration: 1500
-  });
-});
-</script>
+    function escapeHtml(str) {
+      return (str || '').replace(/[&<>"']/g, function (m) {
+        return ({
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#039;'
+        })[m];
+      });
+    }
 
+    function getDirectionsUrl(address) {
+      return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+    }
+
+    function openSidebar(campus) {
+      sidebarTitle.textContent = campus.name;
+
+      const pastorBlock = campus.pastor
+        ? `
+          <div class="info-block">
+            <div class="info-label">Campus Pastor</div>
+            <div class="info-value">${escapeHtml(campus.pastor)}</div>
+          </div>
+        `
+        : '';
+
+      const pastorImageBlock = campus.pastorImage
+        ? `<img class="campus-photo" src="${campus.pastorImage}" alt="${escapeHtml(campus.pastor || campus.name)}" />`
+        : '';
+
+      sidebarContent.innerHTML = `
+        <div class="eyebrow">Palmetto Pointe Church</div>
+        ${pastorImageBlock}
+
+        <div class="info-block">
+          <div class="info-label">Location</div>
+          <div class="info-value">${escapeHtml(campus.address)}</div>
+        </div>
+
+        <div class="info-block">
+          <div class="info-label">Service Times</div>
+          <div class="info-value">${escapeHtml(campus.serviceTimes)}</div>
+        </div>
+
+        ${pastorBlock}
+
+        <div class="actions">
+          <a class="btn btn-primary" href="${getDirectionsUrl(campus.address)}" target="_blank" rel="noopener noreferrer">Get Directions</a>
+          <a class="btn btn-secondary" href="${campus.visitUrl}" target="_blank" rel="noopener noreferrer">Campus Page</a>
+        </div>
+      `;
+
+      sidebar.classList.add('open');
+    }
+
+    async function geocodeAddress(address) {
+      const endpoint = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(address)}.json?limit=1&access_token=${mapboxgl.accessToken}`;
+      const response = await fetch(endpoint);
+      if (!response.ok) throw new Error(`Geocoding failed for ${address}`);
+      const data = await response.json();
+      if (!data.features || !data.features.length) {
+        throw new Error(`No coordinates found for ${address}`);
+      }
+      return data.features[0].center;
+    }
+
+    async function buildMap() {
+      statusBadge.textContent = 'Loading campuses…';
+
+      const resolvedCampuses = [];
+
+      for (const campus of campuses) {
+        try {
+          const coords = await geocodeAddress(campus.address);
+          resolvedCampuses.push({ ...campus, coords });
+        } catch (err) {
+          console.error(err);
+        }
+      }
+
+      if (!resolvedCampuses.length) {
+        statusBadge.textContent = 'Unable to load campus locations.';
+        return;
+      }
+
+      resolvedCampuses.forEach((campus, index) => {
+        const el = document.createElement('div');
+        el.className = 'marker';
+
+        const logo = document.createElement('img');
+        logo.src = LOGO_URL;
+        logo.alt = campus.name;
+        el.appendChild(logo);
+
+        el.addEventListener('click', () => {
+          openSidebar(campus);
+          map.flyTo({
+            center: campus.coords,
+            zoom: Math.max(map.getZoom(), 7),
+            speed: 0.8,
+            curve: 1.2
+          });
+        });
+
+        new mapboxgl.Marker(el)
+          .setLngLat(campus.coords)
+          .addTo(map);
+
+        bounds.extend(campus.coords);
+
+        if (index === 0) {
+          openSidebar(campus);
+        }
+      });
+
+      map.fitBounds(bounds, {
+        padding: { top: 80, bottom: 80, left: 80, right: 440 },
+        maxZoom: 6.5,
+        duration: 1600
+      });
+
+      statusBadge.textContent = `${resolvedCampuses.length} campuses loaded`;
+    }
+
+    map.on('load', buildMap);
+  </script>
 </body>
 </html>
