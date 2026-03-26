@@ -58,21 +58,28 @@
       background: rgba(255,255,255,0.08);
       color: #fff;
       font-size: 18px;
-      line-height: 1;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .close-btn:hover {
-      background: rgba(255,255,255,0.14);
     }
 
     .sidebar h2 {
       margin: 0 36px 16px 0;
       font-size: 24px;
-      line-height: 1.2;
+    }
+
+    .campus-photo {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      border-radius: 14px;
+      margin-bottom: 18px;
+    }
+
+    .pastor-photo {
+      width: 140px;
+      height: 140px;
+      object-fit: cover;
+      border-radius: 14px;
+      margin-top: 10px;
     }
 
     .marker {
@@ -84,39 +91,18 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow:
-        0 0 0 6px rgba(0,128,128,0.12),
-        0 0 20px rgba(0,128,128,0.6);
+      box-shadow: 0 0 20px rgba(0,128,128,0.6);
       cursor: pointer;
     }
 
     .marker img {
       width: 22px;
-      height: 22px;
-      object-fit: contain;
-    }
-
-    .photo {
-      width: 100%;
-      height: 280px;
-      object-fit: cover;
-      object-position: center top;
-      border-radius: 14px;
-      margin-bottom: 18px;
-      display: block;
-      background: #111;
-    }
-
-    .sidebar p {
-      margin: 0 0 14px;
-      line-height: 1.5;
-      color: rgba(255,255,255,0.92);
     }
 
     .btn {
       display: block;
       margin-top: 14px;
-      padding: 12px 14px;
+      padding: 12px;
       text-align: center;
       background: #008080;
       color: white;
@@ -127,18 +113,6 @@
 
     .btn.secondary {
       background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.08);
-    }
-
-    @media (max-width: 700px) {
-      .sidebar {
-        width: 100%;
-        max-width: 100%;
-      }
-
-      .photo {
-        height: 240px;
-      }
     }
   </style>
 </head>
@@ -155,116 +129,119 @@ const LOGO_URL = 'https://storage1.snappages.site/BBR3GQ/assets/images/23682695_
 const PLAN_VISIT_URL = 'https://api.leadconnectorhq.com/widget/form/ty8x2qnVQoZnP9hIAywD';
 
 const campuses = [
-  {
-    name: 'Palmetto Pointe Church - Myrtle Beach',
-    address: '2901 Fantasy Way, Myrtle Beach, SC',
-    times: '9am & 11am',
-    pastor: 'Jamie & Maddie Barfield',
-    pastorTitle: 'Lead Pastors',
-    image: 'https://storage1.snappages.site/BBR3GQ/assets/images/14445111_5796x7891_500.jpg',
-    link: 'https://www.palmettopointechurch.com/myrtlebeach'
-  },
-  {
-    name: 'Palmetto Pointe Church - Socastee',
-    address: '4475 Millpond Rd, Myrtle Beach, SC',
-    coords: [-78.9982, 33.6842],
-    times: '10am',
-    pastor: 'Thomas & Kylie Grainger',
-    pastorTitle: 'Campus Pastor',
-    image: 'https://storage1.snappages.site/BBR3GQ/assets/images/16567429_1024x1533_500.jpeg',
-    link: 'https://palmettopointechurch.com/socastee'
-  },
-  {
-    name: 'Palmetto Pointe Church - Aynor',
-    address: '243 8th Ave, Aynor, SC',
-    times: '10am',
-    pastor: 'Samson & Whitney Ahmed',
-    pastorTitle: 'Campus Pastor',
-    image: 'https://storage1.snappages.site/BBR3GQ/assets/images/16585417_1024x1672_500.jpeg',
-    link: 'https://palmettopointechurch.com/aynor'
-  },
-  {
-    name: 'Palmetto Pointe Church - Clemson',
-    address: '434 Church St, Pendleton, SC',
-    times: '10am',
-    pastor: 'Mike & Terri Teramano',
-    pastorTitle: 'Campus Pastor',
-    image: 'https://storage1.snappages.site/BBR3GQ/assets/images/16585377_1024x1833_500.jpeg',
-    link: 'https://palmettopointechurch.com/clemson'
-  },
-  {
-    name: 'Palmetto Pointe Church - Southern Illinois',
-    address: '1300 Broeking Rd, Marion, IL',
-    times: '10am',
-    pastor: 'Justin & Keturah Dusch',
-    pastorTitle: 'Campus Pastor',
-    image: 'https://storage1.snappages.site/BBR3GQ/assets/images/17870209_853x1280_500.JPEG',
-    link: 'https://palmettopointechurch.com/southernillinois'
-  }
+{
+  name:'Myrtle Beach',
+  address:'2901 Fantasy Way, Myrtle Beach, SC',
+  times:'9am & 11am',
+  pastor:'Lead Pastors',
+  pastorTitle:'Lead Pastors',
+  campusPhoto:'https://storage1.snappages.site/BBR3GQ/assets/images/23695999_1920x1080_2500.png',
+  pastorPhoto:'https://storage1.snappages.site/BBR3GQ/assets/images/14445111_5796x7891_500.jpg',
+  link:'https://www.palmettopointechurch.com/myrtlebeach'
+},
+{
+  name:'Socastee',
+  address:'4475 Millpond Rd, Myrtle Beach, SC',
+  coords:[-78.9982,33.6842],
+  times:'10am',
+  pastor:'Thomas & Kylie Grainger',
+  pastorTitle:'Campus Pastor',
+  campusPhoto:'https://storage1.snappages.site/BBR3GQ/assets/images/23696004_1920x1080_2500.png',
+  pastorPhoto:'https://storage1.snappages.site/BBR3GQ/assets/images/16567429_1024x1533_500.jpeg',
+  link:'https://palmettopointechurch.com/socastee'
+},
+{
+  name:'Aynor',
+  address:'243 8th Ave, Aynor, SC',
+  times:'10am',
+  pastor:'Samson & Whitney Ahmed',
+  pastorTitle:'Campus Pastor',
+  campusPhoto:'https://storage1.snappages.site/BBR3GQ/assets/images/23696009_1920x1080_2500.png',
+  pastorPhoto:'https://storage1.snappages.site/BBR3GQ/assets/images/16585417_1024x1672_500.jpeg',
+  link:'https://palmettopointechurch.com/aynor'
+},
+{
+  name:'Clemson',
+  address:'434 Church St, Pendleton, SC',
+  times:'10am',
+  pastor:'Mike & Terri Teramano',
+  pastorTitle:'Campus Pastor',
+  campusPhoto:'https://storage1.snappages.site/BBR3GQ/assets/images/23696014_1920x1080_2500.png',
+  pastorPhoto:'https://storage1.snappages.site/BBR3GQ/assets/images/16585377_1024x1833_500.jpeg',
+  link:'https://palmettopointechurch.com/clemson'
+},
+{
+  name:'Southern Illinois',
+  address:'1300 Broeking Rd, Marion, IL',
+  times:'10am',
+  pastor:'Justin & Keturah Dusch',
+  pastorTitle:'Campus Pastor',
+  campusPhoto:'https://storage1.snappages.site/BBR3GQ/assets/images/23696019_1920x1080_2500.png',
+  pastorPhoto:'https://storage1.snappages.site/BBR3GQ/assets/images/17870209_853x1280_500.JPEG',
+  link:'https://palmettopointechurch.com/southernillinois'
+}
 ];
 
 const map = new mapboxgl.Map({
-  container: 'map',
-  style: 'mapbox://styles/calebbarfield/cmn64wn1o000601qua68w1xk7',
-  center: [-82, 35],
-  zoom: 5
+  container:'map',
+  style:'mapbox://styles/calebbarfield/cmn64wn1o000601qua68w1xk7',
+  center:[-82,35],
+  zoom:5
 });
 
 const bounds = new mapboxgl.LngLatBounds();
 
-function closeSidebar() {
+function closeSidebar(){
   document.getElementById('sidebar').classList.remove('open');
 }
 
-function openSidebar(campus) {
-  document.getElementById('sidebar').innerHTML = `
+function openSidebar(c){
+  document.getElementById('sidebar').innerHTML=`
     <div class="sidebar-inner">
-      <button class="close-btn" aria-label="Close sidebar" onclick="closeSidebar()">×</button>
-      <h2>${campus.name}</h2>
-      <img class="photo" src="${campus.image}" alt="${campus.name}">
-      <p><strong>Location:</strong><br>${campus.address}</p>
-      <p><strong>Service Times:</strong><br>${campus.times}</p>
+      <button class="close-btn" onclick="closeSidebar()">×</button>
+      <h2>${c.name}</h2>
+      <img class="campus-photo" src="${c.campusPhoto}">
+      <p><strong>Location:</strong><br>${c.address}</p>
+      <p><strong>Service Times:</strong><br>${c.times}</p>
       <p><strong>Childcare:</strong><br>This campus offers childcare for children ages birth through 5th grade.</p>
-      <p><strong>${campus.pastorTitle || 'Campus Pastor'}:</strong><br>${campus.pastor}</p>
-      <a class="btn" target="_blank" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(campus.address)}">Get Directions</a>
-      <a class="btn secondary" target="_blank" href="${campus.link}">Visit Campus Page</a>
-      <a class="btn secondary" target="_blank" href="${PLAN_VISIT_URL}">Plan Your Visit</a>
+      <p><strong>${c.pastorTitle}:</strong><br>${c.pastor}</p>
+      <img class="pastor-photo" src="${c.pastorPhoto}">
+      <a class="btn" target="_blank" href="${PLAN_VISIT_URL}">Plan Your Visit This Sunday →</a>
+      <a class="btn secondary" target="_blank" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(c.address)}">Get Directions</a>
+      <a class="btn secondary" target="_blank" href="${c.link}">Visit Campus Page</a>
     </div>
   `;
   document.getElementById('sidebar').classList.add('open');
 }
 
-async function geocode(address) {
-  const res = await fetch(
-    `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(address)}.json?access_token=${mapboxgl.accessToken}`
-  );
-  const data = await res.json();
-  return data.features[0].center;
+async function geocode(a){
+  const r=await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(a)}.json?access_token=${mapboxgl.accessToken}`);
+  const d=await r.json();
+  return d.features[0].center;
 }
 
-async function loadMap() {
-  for (let campus of campuses) {
-    const coords = campus.coords || await geocode(campus.address);
+async function loadMap(){
+  for(let c of campuses){
+    const coords=c.coords||await geocode(c.address);
 
-    const el = document.createElement('div');
-    el.className = 'marker';
+    const el=document.createElement('div');
+    el.className='marker';
 
-    const img = document.createElement('img');
-    img.src = LOGO_URL;
-    img.alt = campus.name;
+    const img=document.createElement('img');
+    img.src=LOGO_URL;
     el.appendChild(img);
 
-    el.onclick = () => openSidebar(campus);
+    el.onclick=()=>openSidebar(c);
 
     new mapboxgl.Marker(el).setLngLat(coords).addTo(map);
 
     bounds.extend(coords);
   }
 
-  map.fitBounds(bounds, { padding: 80 });
+  map.fitBounds(bounds,{padding:80});
 }
 
-map.on('load', loadMap);
+map.on('load',loadMap);
 </script>
 
 </body>
