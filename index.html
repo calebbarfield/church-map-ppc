@@ -1,34 +1,335 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<title>Map Test</title>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8" />
+  <title>Palmetto Pointe Church Locations</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-<script src="https://api.mapbox.com/mapbox-gl-js/v3.0.0/mapbox-gl.js"></script>
-<link href="https://api.mapbox.com/mapbox-gl-js/v3.0.0/mapbox-gl.css" rel="stylesheet" />
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.0.0/mapbox-gl.js"></script>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.0.0/mapbox-gl.css" rel="stylesheet" />
 
-<style>
-html, body { margin:0; padding:0; height:100%; }
-#map { position:absolute; inset:0; }
-</style>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: #0a0a0a;
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    #map {
+      position: absolute;
+      inset: 0;
+    }
+
+    .sidebar {
+      position: absolute;
+      right: 0;
+      top: 0;
+      width: 400px;
+      max-width: 92vw;
+      height: 100%;
+      background: rgba(10, 10, 10, 0.96);
+      transform: translateX(100%);
+      opacity: 0;
+      transition: transform 0.35s ease, opacity 0.35s ease;
+      overflow-y: auto;
+      box-shadow: -10px 0 30px rgba(0,0,0,0.25);
+      z-index: 10;
+      backdrop-filter: blur(8px);
+    }
+
+    .sidebar.open {
+      transform: translateX(0);
+      opacity: 1;
+    }
+
+    .sidebar-inner {
+      padding: 20px;
+      position: relative;
+      animation: fadeUp 0.35s ease;
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 30px;
+      height: 30px;
+      border: 0;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+
+    .close-btn:hover {
+      background: rgba(255,255,255,0.14);
+      transform: scale(1.05);
+    }
+
+    .sidebar h2 {
+      margin: 0 36px 16px 0;
+      font-size: 24px;
+      line-height: 1.2;
+    }
+
+    .campus-photo {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      object-position: center center;
+      border-radius: 14px;
+      margin-bottom: 18px;
+      display: block;
+      background: #111;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.22);
+    }
+
+    .pastor-section {
+      margin: 14px 0 18px;
+    }
+
+    .pastor-photo {
+      width: 140px;
+      height: 140px;
+      object-fit: cover;
+      object-position: center center;
+      border-radius: 14px;
+      margin-top: 10px;
+      display: block;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+    }
+
+    .sidebar p {
+      margin: 0 0 14px;
+      line-height: 1.5;
+      color: rgba(255,255,255,0.92);
+    }
+
+    .marker {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(0,128,128,0.2);
+      border: 2px solid #008080;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow:
+        0 0 0 6px rgba(0,128,128,0.12),
+        0 0 20px rgba(0,128,128,0.6);
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .marker:hover {
+      transform: scale(1.08);
+      box-shadow:
+        0 0 0 8px rgba(0,128,128,0.16),
+        0 0 24px rgba(0,128,128,0.72);
+    }
+
+    .marker img {
+      width: 22px;
+      height: 22px;
+      object-fit: contain;
+    }
+
+    .btn {
+      display: block;
+      margin-top: 14px;
+      padding: 12px 14px;
+      text-align: center;
+      background: #008080;
+      color: white;
+      text-decoration: none;
+      border-radius: 10px;
+      font-weight: 600;
+      transition: transform 0.2s ease, opacity 0.2s ease, background 0.2s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      opacity: 0.96;
+    }
+
+    .btn.secondary {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    @media (max-width: 700px) {
+      .sidebar {
+        width: 100%;
+        max-width: 100%;
+      }
+
+      .campus-photo {
+        height: 200px;
+      }
+
+      .pastor-photo {
+        width: 130px;
+        height: 130px;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
 <div id="map"></div>
+<div id="sidebar" class="sidebar"></div>
 
 <script>
-mapboxgl.accessToken = 'YOUR_MAPBOX_TOKEN_HERE';
+mapboxgl.accessToken = 'pk.eyJ1IjoiY2FsZWJiYXJmaWVsZCIsImEiOiJjbW42NHFjZ24wMjZoMm9wejU4Ymh1bDdlIn0.Gsp9A3u7A675J3dimnFeLA';
+
+const LOGO_URL = 'https://storage1.snappages.site/BBR3GQ/assets/images/23682695_500x500_500.png';
+const PLAN_VISIT_URL = 'https://api.leadconnectorhq.com/widget/form/ty8x2qnVQoZnP9hIAywD';
+
+const campuses = [
+  {
+    name: 'Myrtle Beach',
+    address: '2901 Fantasy Way, Myrtle Beach, SC',
+    times: '9am & 11am',
+    pastor: 'Jamie & Maddie Barfield',
+    pastorTitle: 'Lead Pastors',
+    campusPhoto: 'https://storage1.snappages.site/BBR3GQ/assets/images/23695999_1920x1080_2500.png',
+    pastorPhoto: 'https://storage1.snappages.site/BBR3GQ/assets/images/23699758_1600x1200_2500.png',
+    link: 'https://www.palmettopointechurch.com/myrtlebeach'
+  },
+  {
+    name: 'Socastee',
+    address: '4475 Millpond Rd, Myrtle Beach, SC',
+    coords: [-78.9982, 33.6842],
+    times: '10am',
+    pastor: 'Thomas & Kylie Grainger',
+    pastorTitle: 'Campus Pastor',
+    campusPhoto: 'https://storage1.snappages.site/BBR3GQ/assets/images/23696004_1920x1080_2500.png',
+    pastorPhoto: 'https://storage1.snappages.site/BBR3GQ/assets/images/23699738_1600x1200_2500.png',
+    link: 'https://palmettopointechurch.com/socastee'
+  },
+  {
+    name: 'Aynor',
+    address: '243 8th Ave, Aynor, SC',
+    times: '10am',
+    pastor: 'Samson & Whitney Ahmed',
+    pastorTitle: 'Campus Pastor',
+    campusPhoto: 'https://storage1.snappages.site/BBR3GQ/assets/images/23696009_1920x1080_2500.png',
+    pastorPhoto: 'https://storage1.snappages.site/BBR3GQ/assets/images/23699748_1600x1200_2500.png',
+    link: 'https://palmettopointechurch.com/aynor'
+  },
+  {
+    name: 'Clemson',
+    address: '434 Church St, Pendleton, SC',
+    times: '10am',
+    pastor: 'Mike & Terri Teramano',
+    pastorTitle: 'Campus Pastor',
+    campusPhoto: 'https://storage1.snappages.site/BBR3GQ/assets/images/23696014_1920x1080_2500.png',
+    pastorPhoto: 'https://storage1.snappages.site/BBR3GQ/assets/images/23699743_1600x1200_2500.png',
+    link: 'https://palmettopointechurch.com/clemson'
+  },
+  {
+    name: 'Southern Illinois',
+    address: '1300 Broeking Rd, Marion, IL',
+    times: '10am',
+    pastor: 'Justin & Keturah Dusch',
+    pastorTitle: 'Campus Pastor',
+    campusPhoto: 'https://storage1.snappages.site/BBR3GQ/assets/images/23696019_1920x1080_2500.png',
+    pastorPhoto: 'https://storage1.snappages.site/BBR3GQ/assets/images/23699753_1600x1200_2500.png',
+    link: 'https://palmettopointechurch.com/southernillinois'
+  }
+];
 
 const map = new mapboxgl.Map({
   container: 'map',
-  style: 'mapbox://styles/mapbox/dark-v11',
+  style: 'mapbox://styles/calebbarfield/cmn64wn1o000601qua68w1xk7',
   center: [-82, 35],
   zoom: 5
 });
 
-map.addControl(new mapboxgl.NavigationControl());
+const bounds = new mapboxgl.LngLatBounds();
+
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+}
+
+function openSidebar(campus) {
+  const pastorPhotoBlock = campus.pastorPhoto
+    ? `<img class="pastor-photo" src="${campus.pastorPhoto}" alt="${campus.pastor}">`
+    : '';
+
+  document.getElementById('sidebar').innerHTML = `
+    <div class="sidebar-inner">
+      <button class="close-btn" aria-label="Close sidebar" onclick="closeSidebar()">×</button>
+      <h2>${campus.name}</h2>
+      <img class="campus-photo" src="${campus.campusPhoto}" alt="${campus.name}">
+      <p><strong>Location:</strong><br>${campus.address}</p>
+      <p><strong>Service Times:</strong><br>${campus.times}</p>
+      <p><strong>Childcare:</strong><br>This campus offers childcare for children ages birth through 5th grade.</p>
+      <div class="pastor-section">
+        <p><strong>${campus.pastorTitle || 'Campus Pastor'}:</strong><br>${campus.pastor}</p>
+        ${pastorPhotoBlock}
+      </div>
+      <a class="btn" target="_blank" href="${PLAN_VISIT_URL}">Plan Your Visit This Sunday →</a>
+      <a class="btn secondary" target="_blank" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(campus.address)}">Get Directions</a>
+      <a class="btn secondary" target="_blank" href="${campus.link}">Visit Campus Page</a>
+    </div>
+  `;
+  document.getElementById('sidebar').classList.add('open');
+}
+
+async function geocode(address) {
+  const res = await fetch(
+    `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(address)}.json?access_token=${mapboxgl.accessToken}`
+  );
+  const data = await res.json();
+  return data.features[0].center;
+}
+
+async function loadMap() {
+  for (let campus of campuses) {
+    const coords = campus.coords || await geocode(campus.address);
+
+    const el = document.createElement('div');
+    el.className = 'marker';
+
+    const img = document.createElement('img');
+    img.src = LOGO_URL;
+    img.alt = campus.name;
+    el.appendChild(img);
+
+    el.onclick = () => openSidebar(campus);
+
+    new mapboxgl.Marker(el).setLngLat(coords).addTo(map);
+
+    bounds.extend(coords);
+  }
+
+  map.fitBounds(bounds, { padding: 80 });
+}
+
+map.on('load', loadMap);
 </script>
 
 </body>
