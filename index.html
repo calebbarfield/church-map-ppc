@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -250,22 +251,22 @@ const campuses = [
     link: 'https://palmettopointechurch.com/clemson'
   },
   {
-    name: 'Southern Illinois',
-    address: '1300 Broeking Rd, Marion, IL',
-    times: '10am',
-    pastor: 'Justin & Keturah Dusch',
+    name: 'Des Moines',
+    address: '321 Elm St, West Des Moines, IA',
+    times: '',
+    pastor: '',
     pastorTitle: 'Campus Pastor',
-    campusPhoto: 'https://storage1.snappages.site/BBR3GQ/assets/images/23696019_1920x1080_2500.png',
-    pastorPhoto: 'https://storage1.snappages.site/BBR3GQ/assets/images/23699753_1600x1200_2500.png',
-    link: 'https://palmettopointechurch.com/southernillinois'
+    campusPhoto: '',
+    pastorPhoto: '',
+    link: 'https://palmettopointechurch.com/desmoines'
   }
 ];
 
 const map = new mapboxgl.Map({
   container: 'map',
   style: 'mapbox://styles/calebbarfield/cmn64wn1o000601qua68w1xk7',
-  center: [-82, 35],
-  zoom: 5
+  center: [-88, 38],
+  zoom: 4
 });
 
 const bounds = new mapboxgl.LngLatBounds();
@@ -275,27 +276,42 @@ function closeSidebar() {
 }
 
 function openSidebar(campus) {
+  const campusPhotoBlock = campus.campusPhoto
+    ? `<img class="campus-photo" src="${campus.campusPhoto}" alt="${campus.name}">`
+    : '';
+
+  const serviceTimesBlock = campus.times
+    ? `<p><strong>Service Times:</strong><br>${campus.times}</p>`
+    : '';
+
   const pastorPhotoBlock = campus.pastorPhoto
     ? `<img class="pastor-photo" src="${campus.pastorPhoto}" alt="${campus.pastor}">`
+    : '';
+
+  const pastorSection = campus.pastor
+    ? `
+      <div class="pastor-section">
+        <p><strong>${campus.pastorTitle || 'Campus Pastor'}:</strong><br>${campus.pastor}</p>
+        ${pastorPhotoBlock}
+      </div>
+    `
     : '';
 
   document.getElementById('sidebar').innerHTML = `
     <div class="sidebar-inner">
       <button class="close-btn" aria-label="Close sidebar" onclick="closeSidebar()">×</button>
       <h2>${campus.name}</h2>
-      <img class="campus-photo" src="${campus.campusPhoto}" alt="${campus.name}">
+      ${campusPhotoBlock}
       <p><strong>Location:</strong><br>${campus.address}</p>
-      <p><strong>Service Times:</strong><br>${campus.times}</p>
+      ${serviceTimesBlock}
       <p><strong>Childcare:</strong><br>This campus offers childcare for children ages birth through 5th grade.</p>
-      <div class="pastor-section">
-        <p><strong>${campus.pastorTitle || 'Campus Pastor'}:</strong><br>${campus.pastor}</p>
-        ${pastorPhotoBlock}
-      </div>
-      <a class="btn" target="_blank" href="${PLAN_VISIT_URL}">Plan Your Visit This Sunday →</a>
-      <a class="btn secondary" target="_blank" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(campus.address)}">Get Directions</a>
-      <a class="btn secondary" target="_blank" href="${campus.link}">Visit Campus Page</a>
+      ${pastorSection}
+      <a class="btn" target="_blank" rel="noopener noreferrer" href="${PLAN_VISIT_URL}">Plan Your Visit This Sunday →</a>
+      <a class="btn secondary" target="_blank" rel="noopener noreferrer" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(campus.address)}">Get Directions</a>
+      <a class="btn secondary" target="_blank" rel="noopener noreferrer" href="${campus.link}">Visit Campus Page</a>
     </div>
   `;
+
   document.getElementById('sidebar').classList.add('open');
 }
 
@@ -303,30 +319,62 @@ async function geocode(address) {
   const res = await fetch(
     `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(address)}.json?access_token=${mapboxgl.accessToken}`
   );
+
+  if (!res.ok) {
+    throw new Error(`Geocoding failed: ${res.status}`);
+  }
+
   const data = await res.json();
+
+  if (!data.features || !data.features.length) {
+    throw new Error(`No coordinates found for ${address}`);
+  }
+
   return data.features[0].center;
 }
 
 async function loadMap() {
-  for (let campus of campuses) {
-    const coords = campus.coords || await geocode(campus.address);
+  for (const campus of campuses) {
+    try {
+      const coords = campus.coords || await geocode(campus.address);
 
-    const el = document.createElement('div');
-    el.className = 'marker';
+      const el = document.createElement('div');
+      el.className = 'marker';
+      el.setAttribute('role', 'button');
+      el.setAttribute('tabindex', '0');
+      el.setAttribute('aria-label', `View ${campus.name} campus`);
 
-    const img = document.createElement('img');
-    img.src = LOGO_URL;
-    img.alt = campus.name;
-    el.appendChild(img);
+      const img = document.createElement('img');
+      img.src = LOGO_URL;
+      img.alt = campus.name;
+      el.appendChild(img);
 
-    el.onclick = () => openSidebar(campus);
+      el.onclick = () => openSidebar(campus);
 
-    new mapboxgl.Marker(el).setLngLat(coords).addTo(map);
+      el.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          openSidebar(campus);
+        }
+      });
 
-    bounds.extend(coords);
+      new mapboxgl.Marker(el)
+        .setLngLat(coords)
+        .addTo(map);
+
+      bounds.extend(coords);
+
+    } catch (error) {
+      console.error(`Could not load ${campus.name}:`, error);
+    }
   }
 
-  map.fitBounds(bounds, { padding: 80 });
+  if (!bounds.isEmpty()) {
+    map.fitBounds(bounds, {
+      padding: 80,
+      maxZoom: 12
+    });
+  }
 }
 
 map.on('load', loadMap);
